@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{171cd11a-2bb1-4dbb-be4a-1828ef2c4de3}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{6b79c171-cc1f-4a99-ab0f-d9a7bd1e837b}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{da011329-1c0b-47b2-bfd4-2003411ab42e}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Multicam">
+      <UniqueIdentifier>{31d493ff-84a5-48fe-9279-85c33789280f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="camera\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\camview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\frame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="worker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wxMulticam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\about.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdwx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="camera\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\camview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="worker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wxMulticam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\ESFilter.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\EuresysException.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\exceptionCodes.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\McDef.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\McIo.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\McParams.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\McParamsCompat1x.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\mjpegAviWriter.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\multicam.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\MultiCamChannel.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\speedycolor.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\speedyweb.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\videoStorage.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\videoStorage_api.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiCam\VideoStorage_ExternC_Interface.h">
+      <Filter>Multicam</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\about.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdwx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="wxMulticam.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\camera.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\wxMulticamAbout.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

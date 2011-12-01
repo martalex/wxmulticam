@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////
+// Package:		GUI About definition
+// File:		about.h
+// Purpose:		define about window
+//
+// Based on source code of Larry Lart
+////////////////////////////////////////////////////////////////////
+
+#ifndef _ABOUT_H 
+#define _ABOUT_H
+
+// class:	CWxOpencvAbout
+///////////////////////////////////////////////////////
+class CAbout : public wxDialog
+{
+// methods
+public:
+    CAbout(wxWindow *parent);
+};
+
+
+#endif
