@@ -161,3 +161,11 @@ void *CCameraWorker::Entry( )
 
     return NULL;
 }
+
+void CCameraWorker::Stop()
+{
+    if( m_pCamera )
+        m_pCamera->PauseResume();
+    
+    Delete();
+}

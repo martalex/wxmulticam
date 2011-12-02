@@ -29,6 +29,10 @@
     #include "wx/rawbmp.h"
 #endif
 
+#ifndef  WX_PRECOMP
+#include "wx/wx.h"
+#endif //precompiled headers
+
 #ifdef __WXX11__
 //#include "ronn.xpm"
 #endif
@@ -48,7 +52,7 @@
 ////////////////////////////////////////////////////////////////////
 CAbout::CAbout(wxWindow *parent)
                : wxDialog(parent, -1,
-                          _("About wxOpenCv Demo"),
+                          _("About wxMulticam Demo"),
                           wxDefaultPosition,
                           wxDefaultSize,
                           wxDEFAULT_DIALOG_STYLE /*| wxDIALOG_MODAL*/)

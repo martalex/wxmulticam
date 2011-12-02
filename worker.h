@@ -29,6 +29,8 @@ public:
     // thread entry point
     virtual void *Entry();
     virtual void OnExit();
+
+    void Stop();
     double GetTime();
 
 // data

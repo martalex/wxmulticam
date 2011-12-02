@@ -40,7 +40,7 @@ public:
     
     CCamView* GetCameraView( );
     void SetParentApp( wxMultiCamApp *pApp );
-    void SetStatusBarText( const char* strText, int number=0 );
+    void SetStatusBarText( const wxString& strText, int number=0 );
     void ResetLayout( );
 
 // public data
@@ -62,5 +62,4 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
-
 #endif

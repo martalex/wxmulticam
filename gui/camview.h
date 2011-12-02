@@ -10,9 +10,6 @@
 #ifndef _CCAMVIEW_H
 #define _CCAMVIEW_H
 
-// external classes
-class CCamera;
-
 class CCamView : public wxWindow
 {
 public: 
@@ -22,19 +19,17 @@ public:
 // Operations
 public:
 
-
 // Implementation
 public:
     bool IsCaptureEnabled( );
     void CheckUpdate( );
 
     // Draw method
-    void DrawCam( BYTE* pImg );
+    void DrawCam( BYTE* pImg, int w, int h );
     void Draw( wxDC& dc );
 
 // Public data
 public:
-    CCamera *m_pCamera;
 
 // Protected data
 protected:

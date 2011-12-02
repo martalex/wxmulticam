@@ -8,18 +8,21 @@
 
 #include "stdwx.h"
 
-#define _GUI_RUN 1
+#ifndef  WX_PRECOMP
+#include "wx/wx.h"
+#endif //precompiled headers
+
+//#define _GUI_RUN 0
 
 // Multicam includes
 
 #include "MultiCam/multicam.h"
 
 // other local includes
-#include "../wxMulticam.h"
 #include "../worker.h"
 
 // GUI include
-#ifdef _GUI_RUN
+#if _GUI_RUN
 #include "../gui/camview.h"
 #include "../gui/frame.h"
 #endif
@@ -50,8 +53,10 @@ const int SURF_COUNT = 10;
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
 CCamera::CCamera(  ) :
+#if _GUI_RUN
     m_pCameraView( NULL ),
     m_pFrame( NULL ),
+#endif
     m_pWorker( NULL )
 {
     m_isRunning = false;
@@ -67,6 +72,8 @@ CCamera::CCamera(  ) :
     
     m_bIsChange = 0;
     m_nTotalFrames = 0;
+    m_MulticamDriverOK = false;
+
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -81,8 +88,40 @@ CCamera::~CCamera( )
     Uninitialize( );
 
     m_pWorker = NULL;
+#if _GUI_RUN
     m_pCameraView = NULL;
     m_pFrame = NULL;
+#endif
+}
+
+
+bool CCamera::OpenMulticam()
+{
+    // Allocate Multicam driver
+    MCSTATUS Status;
+    Status = McOpenDriver(NULL);
+    if(Status != MC_OK)
+    {
+        m_MulticamDriverOK = false;
+        //FormatMulticamErrorText(Status, _T("McOpenDriver"), m_MulticamAllocationErrorMessage);
+    }
+    else
+    {
+        m_MulticamDriverOK = true;
+        McSetParamInt(MC_CONFIGURATION, MC_ErrorHandling, MC_ErrorHandling_NONE);
+    }
+
+    return m_MulticamDriverOK;
+}
+
+void CCamera::CloseMulticam()
+{
+    //release Multicam
+    if(m_MulticamDriverOK)
+    {
+        McCloseDriver();
+        m_MulticamDriverOK = false;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -94,6 +133,9 @@ CCamera::~CCamera( )
 ////////////////////////////////////////////////////////////////////
 int CCamera::Init(  )
 {
+    if( false == OpenMulticam() )
+        return( 0 );
+
     m_timeCurrFrameStamp = m_pWorker->GetTime( );
     m_timePrevFrameStamp = m_timeCurrFrameStamp;
     
@@ -280,6 +322,8 @@ void CCamera::Uninitialize()
         delete [] m_pVideoImg;
     
     m_pVideoImg = NULL;
+
+    CloseMulticam();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -308,11 +352,7 @@ int CCamera::GetSize( )
         return false;
     }
 
-        
-    // now get my properties
-// 	m_nWidth = (int) cvGetCaptureProperty( m_pCapture, CV_CAP_PROP_FRAME_WIDTH );
-// 	m_nHeight = (int) cvGetCaptureProperty( m_pCapture, CV_CAP_PROP_FRAME_HEIGHT );
-    
+#if _GUI_RUN
     // set camview size
     wxASSERT( m_pCameraView && m_pFrame );
 
@@ -320,8 +360,9 @@ int CCamera::GetSize( )
         m_pCameraView->SetSize( m_nWidth, m_nHeight );
     if( m_pFrame )
         m_pFrame->ResetLayout( );
+#endif
 
-    return( 0 );
+    return( 1 );
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -537,7 +578,7 @@ void CCamera::GetNextFrame( void* )
 #ifdef _GUI_RUN
         // Update gui
         if( m_pCameraView )
-            m_pCameraView->DrawCam( m_pVideoImg );
+            m_pCameraView->DrawCam( m_pVideoImg, m_nWidth, m_nHeight );
 #endif	
 
         m_isImageReady = false;
@@ -566,13 +607,18 @@ void CCamera::GetNextFrame( void* )
 
             // get info of number of frames per second in a string
             // for debugging/etc
-            sprintf( m_strFps, "FPS: %5.1f", m_nFps );
-            m_pFrame->SetStatusBarText( m_strFps,0 );
+            m_strFps.Empty();
+            m_strFps << "FPS: " << (int)m_nFps;
 
             // get info of number of received frames in a string
             // for debugging/etc
-            sprintf( m_strFps, "Frames: %d", m_nTotalFrames );
-            m_pFrame->SetStatusBarText( m_strFps, 1 );
+            m_strFrames.Empty();
+            m_strFrames << "Frames: " << m_nTotalFrames;
+
+#if _GUI_RUN
+            m_pFrame->SetStatusBarText( m_strFps,0 );
+            m_pFrame->SetStatusBarText( m_strFrames, 1 );
+#endif
         }
     }
 }
@@ -723,10 +769,12 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
             m_nWidth = ImageWidth;
             m_nHeight = ImageHeight;
 
+#if _GUI_RUN
             if( m_pCameraView )
                 m_pCameraView->SetSize( m_nWidth, m_nHeight );
             if( m_pFrame )
                 m_pFrame->ResetLayout( );
+#endif
         }
         //copy
         int ImageSizeBytes = ImageWidth*ImageHeight*ImagePixelSize;
