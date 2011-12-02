@@ -71,10 +71,10 @@ CGUIFrame::CGUIFrame( wxFrame *frame, const wxString& title,
     CreateStatusBar( 2 );
 
     // make File menu bar
-    wxMenu *pFileMenu = new wxMenu( "", wxMENU_TEAROFF );
-    pFileMenu->Append( wxID_ABOUT, "About" );
+    wxMenu *pFileMenu = new wxMenu( L"", wxMENU_TEAROFF );
+    pFileMenu->Append( wxID_ABOUT, L"About" );
     pFileMenu->AppendSeparator( );
-    pFileMenu->Append( wxID_EXIT, "Exit" );
+    pFileMenu->Append( wxID_EXIT, L"Exit" );
 
     // make Camera menu bar
 //     wxMenu *pVisionMenu = new wxMenu;
@@ -83,7 +83,7 @@ CGUIFrame::CGUIFrame( wxFrame *frame, const wxString& title,
     
     // make menu toolbar
     menuBar = new wxMenuBar;
-    menuBar->Append( pFileMenu, "File" );
+    menuBar->Append( pFileMenu, L"File" );
 //    menuBar->Append( pVisionMenu, "Camera");
     this->SetMenuBar(menuBar);
     
@@ -95,7 +95,7 @@ CGUIFrame::CGUIFrame( wxFrame *frame, const wxString& title,
     // build static/logical boxes
 
     // build static/logical boxes
-    wxStaticBox *pCameraBox = new wxStaticBox( m_pMainPanel, -1, "camera", 
+    wxStaticBox *pCameraBox = new wxStaticBox( m_pMainPanel, -1, _T("camera"), 
                             wxPoint(2,0), wxSize(360,275) );
 
     // get my main static sizer by the box

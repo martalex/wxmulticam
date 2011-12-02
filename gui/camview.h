@@ -10,6 +10,8 @@
 #ifndef _CCAMVIEW_H
 #define _CCAMVIEW_H
 
+#include <stdint.h>
+
 class CCamView : public wxWindow
 {
 public: 
@@ -25,7 +27,7 @@ public:
     void CheckUpdate( );
 
     // Draw method
-    void DrawCam( BYTE* pImg, int w, int h );
+    void DrawCam( uint8_t* pImg, int w, int h );
     void Draw( wxDC& dc );
 
 // Public data

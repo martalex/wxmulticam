@@ -9,7 +9,7 @@
 
 #ifndef _CAMERA_H
 #define _CAMERA_H
-
+#include <stdint.h>
 //define external classes
 #if _GUI_RUN
 class CCamView;
@@ -29,7 +29,7 @@ public:
     ~CCamera( );
 
     // get frame method
-    BYTE *GetIFrame( );
+    uint8_t *GetIFrame( );
 
     // initialize camera frame def
     int Init( );
@@ -70,7 +70,7 @@ public:
 
 // protected data
 protected:
-    BYTE*           m_pVideoImg;
+    uint8_t*           m_pVideoImg;
     bool            m_isImageReady;
 
     double          m_nFpsAlpha;

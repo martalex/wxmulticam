@@ -50,10 +50,12 @@ END_EVENT_TABLE()
 bool wxMultiCamApp::OnInit( )
 {
     // create camera object
+#ifdef WIN32
     m_pCamera = new CCamera( );
+#endif
 
     // create widows frame
-    CGUIFrame* m_pFrame = new CGUIFrame( NULL, "wxMulticam Demo",
+    CGUIFrame* m_pFrame = new CGUIFrame( NULL, L"wxMulticam Demo",
                          wxPoint(-1, -1), wxSize(640, 600) );
 
     // Show the frame
@@ -83,11 +85,13 @@ bool wxMultiCamApp::OnInit( )
     m_pCamera->m_pFrame = m_pFrame;
 #endif
     // initialize camera 
+#ifdef WIN32
     if( m_pCamera->Init(  ) == 0 )
     {
-        wxMessageBox( "Can't initialize camera.",
-                    "Error" );
+        wxMessageBox( L"Can't initialize camera.",
+                    L"Error" );
     }
+#endif
 
     // start the thread
     if ( m_pCameraWorker->Run() != wxTHREAD_NO_ERROR )
@@ -113,7 +117,10 @@ int wxMultiCamApp::OnExit( )
     }
     m_pCameraWorker = NULL;
 
+#ifdef WIN32
     delete( m_pCamera );
+#endif
+
 
     return wxApp::OnExit();
 }
