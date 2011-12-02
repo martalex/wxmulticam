@@ -11,9 +11,12 @@
 #define _CAMERA_H
 
 //define external classes
+#if _GUI_RUN
 class CCamView;
-class CCameraWorker;
 class CGUIFrame;
+#endif
+
+class CCameraWorker;
 
 #include "MultiCam/multicam.h"
 
@@ -42,6 +45,9 @@ public:
     ///< called after the image had been grabbed
     void OnImageGrabbed( MCSIGNALINFO* pSigInfo ); 
 
+    wxString GetFpsStr() { return m_strFps; }
+    wxString GetFramesStr() { return m_strFrames; }
+
 // data
 public:
     // status flags
@@ -52,8 +58,11 @@ public:
     bool            m_bProcBusy;
     int             m_bIsChange;
 
+#if _GUI_RUN
     CCamView*       m_pCameraView;
     CGUIFrame*      m_pFrame;
+#endif
+
     CCameraWorker*  m_pWorker;
 
     int             m_nWidth;
@@ -66,16 +75,22 @@ protected:
 
     double          m_nFpsAlpha;
     double          m_nFps;
-    char            m_strFps[32];
+    wxString        m_strFps;
+    wxString        m_strFrames;
     double          m_timePrevFrameStamp;
     double          m_timeCurrFrameStamp;
     int             m_nTotalFrames;
 
     MCHANDLE m_Channel;
+    bool m_MulticamDriverOK;
 
 // Implementation
 protected:
     void GetNextFrame( void* );
+
+    bool OpenMulticam();
+    void CloseMulticam();
+
 };
 
 #endif 

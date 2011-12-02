@@ -17,6 +17,10 @@
 #include "wx/minifram.h"
 #include "wx/thread.h"
 
+#ifndef  WX_PRECOMP
+#include "wx/wx.h"
+#endif //precompiled headers
+
 // other includes
 #include "about.h"
 #include "../wxMulticam.h"
@@ -119,17 +123,13 @@ CGUIFrame::CGUIFrame( wxFrame *frame, const wxString& title,
 // Method:	Destructor
 // Class:	CGUIFrame
 // Purpose:	delete/destroy GUI MainFrame object  
-// Input:	mothing
+// Input:	nothing
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
 CGUIFrame::~CGUIFrame( )
 {
-    // first pause camera
-    m_pCamView->m_pCamera->PauseResume( );
-
-    // tell first to the worker to exit
-//	m_pWorker->Pause( );
-    m_pWorker->Delete( );
+    // tell to the worker to pause camera and exit
+    m_pWorker->Stop( );
 
     // clean on exit
     delete m_pCamView;
@@ -269,12 +269,20 @@ void CGUIFrame::OnAbout( wxCommandEvent& event )
 // Method:	SetStatusBarText
 // Class:	CGUIFrame
 // Purpose:	when minimize
-// Input:	mothing
+// Input:	text to display
+// Input:	pane index (zero-based)
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
-void CGUIFrame::SetStatusBarText( const char* strText, int number )
+void CGUIFrame::SetStatusBarText( const wxString& strText, int number )
 {
-    GetStatusBar()->SetStatusText( strText, number );
+    wxStatusBar* pStsBar = GetStatusBar();
+    if( pStsBar )
+    {
+        wxString strOldText = pStsBar->GetStatusText( number );
+        if( strOldText != strText )
+            pStsBar->SetStatusText( strText, number );
+    }
+    
 
     return;
 }
@@ -283,7 +291,7 @@ void CGUIFrame::SetStatusBarText( const char* strText, int number )
 // Method:	ResetLayout
 // Class:	CGUIFrame
 // Purpose:	tell all components to reset layout 
-// Input:	mothing
+// Input:	nothing
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
 void CGUIFrame::ResetLayout( )

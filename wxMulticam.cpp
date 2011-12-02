@@ -13,6 +13,10 @@
 #include "wx/minifram.h"
 #include "wx/thread.h"
 
+#ifndef  WX_PRECOMP
+#include "wx/wx.h"
+#endif //precompiled headers
+
 // custom headers
 #include "gui/frame.h"
 #include "gui/camview.h"
@@ -22,8 +26,6 @@
 // include main header
 #include "wxMulticam.h"
 
-// Multicam header
-#include "MultiCam/multicam.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -38,33 +40,6 @@ BEGIN_EVENT_TABLE(wxMultiCamApp, wxApp)
 END_EVENT_TABLE()
 
 
-
-void wxMultiCamApp::OpenMulticam()
-{
-    // Allocate Multicam driver
-    MCSTATUS Status;
-    Status = McOpenDriver(NULL);
-    if(Status != MC_OK)
-    {
-        m_MulticamDriverOK = false;
-        //FormatMulticamErrorText(Status, _T("McOpenDriver"), m_MulticamAllocationErrorMessage);
-    }
-    else
-    {
-        m_MulticamDriverOK = true;
-        McSetParamInt(MC_CONFIGURATION, MC_ErrorHandling, MC_ErrorHandling_NONE);
-    }
-}
-
-void wxMultiCamApp::CloseMulticam()
-{
-    //release Multicam
-    if(m_MulticamDriverOK)
-    {
-        McCloseDriver();
-        m_MulticamDriverOK = false;
-    }
-}
 ////////////////////////////////////////////////////////////////////
 // Method:	On Init
 // Class:	wxMultiCamApp
@@ -74,8 +49,6 @@ void wxMultiCamApp::CloseMulticam()
 ////////////////////////////////////////////////////////////////////
 bool wxMultiCamApp::OnInit( )
 {
-    OpenMulticam();
-
     // create camera object
     m_pCamera = new CCamera( );
 
@@ -105,24 +78,16 @@ bool wxMultiCamApp::OnInit( )
     m_pFrame->m_pWorker = m_pCameraWorker;
     m_pCameraWorker->m_pCamera = m_pCamera;
     m_pCamera->m_pWorker = m_pCameraWorker;
+#if _GUI_RUN
     m_pCamera->m_pCameraView = pCamView;
     m_pCamera->m_pFrame = m_pFrame;
-    
-    if( pCamView )
-        pCamView->SetSize( m_pCamera->m_nWidth, m_pCamera->m_nHeight );
-    if( m_pFrame )
-        m_pFrame->ResetLayout( );
-
+#endif
     // initialize camera 
     if( m_pCamera->Init(  ) == 0 )
     {
-        wxMessageBox( "Can't initialize camera. Try to change format",
+        wxMessageBox( "Can't initialize camera.",
                     "Error" );
     }
-
-
-    // Link camera view to camera object
-    pCamView->m_pCamera = m_pCamera;
 
     // start the thread
     if ( m_pCameraWorker->Run() != wxTHREAD_NO_ERROR )
@@ -149,8 +114,6 @@ int wxMultiCamApp::OnExit( )
     m_pCameraWorker = NULL;
 
     delete( m_pCamera );
-
-    CloseMulticam();
 
     return wxApp::OnExit();
 }

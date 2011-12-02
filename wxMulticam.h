@@ -27,10 +27,10 @@ class CCamera;
 
 class wxMultiCamApp : public wxApp
 {
-    bool m_MulticamDriverOK;
-
-    void OpenMulticam();
-    void CloseMulticam();
+//     bool m_MulticamDriverOK;
+// 
+//     void OpenMulticam();
+//     void CloseMulticam();
 
 // public methods
 public:

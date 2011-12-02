@@ -20,13 +20,13 @@
 //#include "wx/wxprec.h"
 #include <wx/image.h>
 
-// #ifndef  WX_PRECOMP
-//   #include "wx/wx.h"
-// #endif //precompiled headers
+#ifndef  WX_PRECOMP
+  #include "wx/wx.h"
+#endif //precompiled headers
 
 // other headers
 #include "../wxMulticam.h"
-#include "../camera/camera.h"
+//#include "../camera/camera.h"
 
 // main header
 #include "camview.h"
@@ -52,7 +52,7 @@ CCamView::CCamView( wxWindow *frame, const wxPoint& pos, const wxSize& size ):
             wxWindow(frame, -1, pos, size, wxSIMPLE_BORDER ),
             m_pWxImg( NULL )
 {
-    m_pCamera = NULL;
+//    m_pCamera = NULL;
 
     // set my canvas width/height
     m_nWidth = size.GetWidth( );
@@ -76,7 +76,7 @@ CCamView::~CCamView( )
         delete m_pWxImg;
     
     m_pWxImg = NULL;
-    m_pCamera = NULL;
+//    m_pCamera = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -147,32 +147,28 @@ void CCamView::Draw( wxDC& dc )
 // Input:	nothing
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
-//void CCamView::DrawCam( IplImage* pImg )
-void CCamView::DrawCam( BYTE* pImg )
+void CCamView::DrawCam( BYTE* pImg, int w, int h )
 {
-//	return;
     if( m_bDrawing ) return;
+
     m_bDrawing = true;
     int i = 0;
 
     // if there was an image then we need to update view
     if( pImg )
     {
-        int nCamWidth = m_pCamera->m_nWidth;
-        int nCamHeight = m_pCamera->m_nHeight;
-
         // convert data from raw image to wxImg 
         if( NULL == m_pWxImg )
-            m_pWxImg = new wxImage( nCamWidth, nCamHeight, pImg/*rawData*/, TRUE );
+            m_pWxImg = new wxImage( w, h, pImg/*rawData*/, TRUE );
         else
-            m_pWxImg->SetData( pImg, nCamWidth, nCamHeight, TRUE );
+            m_pWxImg->SetData( pImg, w, h, TRUE );
 
         wxImage mirror = m_pWxImg->Mirror( false );
 
         //wxImage pWxImg = wxImage( nCamWidth, nCamHeight, pImg/*rawData*/, TRUE );
 
         // convert to bitmap to be used by the window to draw
-        if( m_nWidth < nCamWidth || m_nHeight < nCamHeight )
+        if( m_nWidth < w || m_nHeight < h )
             m_pBitmap = wxBitmap( mirror.Scale(m_nWidth, m_nHeight/*, wxIMAGE_QUALITY_BICUBIC*/) );
         else
             m_pBitmap = wxBitmap( mirror/**m_pWxImg*/ );
