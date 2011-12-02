@@ -40,7 +40,6 @@ include_directories (
 # add sources to compile
 set ( CAM_SOURCES ${CAM_SOURCES}
   gui/about.cpp
-  camera/camera.cpp
   gui/camview.cpp
   gui/frame.cpp
   stdwx.cpp
@@ -48,14 +47,21 @@ set ( CAM_SOURCES ${CAM_SOURCES}
   wxMulticam.cpp )
 #------------------------------------------------------------------------------
 # add resoures to compile
-#set ( CAM_SOURCES ${CAM_SOURCES}
-#  xrd5.rc )
+if(WIN32)
+  set ( CAM_SOURCES ${CAM_SOURCES}
+    camera/camera.cpp
+    wxMulticam.rc )
+endif(WIN32)
 #------------------------------------------------------------------------------
 # build gui
 add_executable ( wxMulticam WIN32 ${CAM_SOURCES} )
 #------------------------------------------------------------------------------
 # link with libs
-target_link_libraries( wxMulticam ${wxWidgets_LIBRARIES} ${MULTICAM_LIB} )
+target_link_libraries( wxMulticam ${wxWidgets_LIBRARIES} )
+#------------------------------------------------------------------------------
+if( ${MULTICAM_LIB} )
+  target_link_libraries( wxMulticam ${MULTICAM_LIB} )
+endif( ${MULTICAM_LIB} )
 #------------------------------------------------------------------------------
 # install program
 install ( TARGETS wxMulticam DESTINATION bin )
