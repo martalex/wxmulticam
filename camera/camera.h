@@ -67,6 +67,7 @@ public:
 
     int             m_nWidth;
     int             m_nHeight;
+    int             m_nImagePixelSize;
 
 // protected data
 protected:
@@ -88,6 +89,8 @@ protected:
 
     MCHANDLE m_Channel;
     bool m_MulticamDriverOK;
+
+    bool m_bIsProcessing;
 
 // Implementation
 protected:

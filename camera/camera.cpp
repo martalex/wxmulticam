@@ -78,6 +78,11 @@ CCamera::CCamera(
     m_nTotalFrames = 0;
     m_MulticamDriverOK = false;
 
+    m_nWidth = 0;
+    m_nHeight = 0;
+    m_nImagePixelSize = 0;
+
+    m_bIsProcessing = false;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -526,6 +531,11 @@ void CCamera::GetNextFrame( void* )
 //    else
 //        m_timePrevFrameStamp = m_timeCurrFrameStamp;
 
+    if( m_bIsProcessing )
+        return;
+
+    m_bIsProcessing = true;
+
 // #ifdef WIN32_LARRY	
 // 	// get frame if any
 //  	pFrame = cvQueryFrame( m_pCapture );
@@ -551,25 +561,6 @@ void CCamera::GetNextFrame( void* )
 //         return;
 // 	}
 
-    ////////////////////////////
-    // if video window ? & frame ?
-//     if( pFrame )
-//     {
-// 		// if no video image 
-//         if( !m_pVideoImg ) 
-//         {
-//             cvReleaseImage( &m_pVideoImg );
-// 			m_pVideoImg = cvCreateImage( cvSize( m_nWidth, m_nHeight ), 8, 3 );
-//         }
-// 		
-// 		// check for the last origin of the frame
-// 		if( pFrame->origin == 1 )
-// 		{
-// 			cvConvertImage( pFrame, m_pVideoImg, CV_CVTIMG_FLIP | CV_CVTIMG_SWAP_RB );
-// 		} else
-// 		{
-// 			cvCopy( pFrame, m_pVideoImg, 0 );
-// 		}		
 // 
 // #ifdef _GUI_RUN
 // 		// Update gui
@@ -622,12 +613,23 @@ void CCamera::GetNextFrame( void* )
 #if _GUI_RUN
             if( m_pFrame )
             {
-                m_pFrame->SetStatusBarText( m_strFps,0 );
-                m_pFrame->SetStatusBarText( m_strFrames, 1 );
+                m_pFrame->SetStatusBarText( m_strFps, SBID_FPS );
+                m_pFrame->SetStatusBarText( m_strFrames, SBID_FRAMES );
+
+                
+                if( m_nTotalFrames % 10 == 1 )
+                {
+//                    m_pFrame->SendFrameNumber( m_nTotalFrames );
+                    m_pFrame->SendFrameData( m_pVideoImg, m_nWidth, m_nHeight, m_nImagePixelSize );
+                }
+                //wxSleep( 3000 );
             }
 #endif
         }
     }
+
+    m_bIsProcessing = false;
+
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -777,13 +779,14 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
 
             m_nWidth = ImageWidth;
             m_nHeight = ImageHeight;
+            m_nImagePixelSize = ImagePixelSize;
 
-#if _GUI_RUN
-            if( m_pCameraView )
-                m_pCameraView->SetSize( m_nWidth, m_nHeight );
-            if( m_pFrame )
-                m_pFrame->ResetLayout( );
-#endif
+// #if _GUI_RUN
+//             if( m_pCameraView )
+//                 m_pCameraView->SetSize( m_nWidth, m_nHeight );
+//             if( m_pFrame )
+//                 m_pFrame->ResetLayout( );
+// #endif
         }
         //copy
         int ImageSizeBytes = ImageWidth*ImageHeight*ImagePixelSize;

@@ -50,6 +50,14 @@ enum
     wxID_CAM_STOP
 };
 
+enum EStatusBarId 
+{
+    SBID_FPS = 0,
+    SBID_FRAMES,
+    SBID_NETWORK_STATUS,
+    SBID_NOF
+};
+
 static wxMenuBar *menuBar = NULL;
 
 class CGUIFrame : public wxFrame
@@ -64,14 +72,32 @@ public:
     void SetStatusBarText( const wxString& strText, int number=0 );
     void ResetLayout( );
 
+    void SendFrameNumber( int number );
+    void SendFrameData( BYTE* pImg, int w, int h, int pxs );
+
 protected:
-    bool ServerCreate();
+    void CameraStop();
+    void NetworkStop();
+
+    bool CreateServer();
+    bool WaitForConnection();
+
+    bool CreateClient();
+    void OpenConnection();
+    void Disconnect();
+
+    void UpdateStatusBar();
+    void UpdateFrameNumber( wxSocketBase *sock );
+    void UpdateFrameData( wxSocketBase *sock );
+
 
 // public data
 public:
 
 // Protected data
 protected: 
+    wxMenu         *m_menuNet;
+    
     CCamera*        m_pCamera;
     CCameraWorker*  m_pWorker;
 
@@ -79,22 +105,27 @@ protected:
     wxPanel*        m_pMainPanel;
 
     wxSocketServer *m_server;
+    wxSocketClient *m_sock; //m_client;
+
+    int m_numClients;
+    bool m_IsServer;
+    bool m_IsBusy;
 
 // message map functions
 protected:
-    void OnStartServer( wxCommandEvent& event );
-    void OnConnectToServer( wxCommandEvent& event );
-    void OnWaitConnect( wxCommandEvent& event );
+    void OnServerStart( wxCommandEvent& event );
+//    void OnServerWaitConnect( wxCommandEvent& event );
     
+    void OnConnectToServer( wxCommandEvent& event );
+
     void OnCameraStart( wxCommandEvent& event );
     void OnCameraStop( wxCommandEvent& event );
-
-    void CameraStop();
 
     void OnAbout( wxCommandEvent& event );
     void OnExit( wxCommandEvent& WXUNUSED(pEvent) );
 
     void OnServerEvent(wxSocketEvent& event);
+    void OnSocketEvent(wxSocketEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
