@@ -23,7 +23,7 @@ class CCameraWorker : public wxThread
 {
 // methods
 public:
-    CCameraWorker( CGUIFrame *pFrame );
+    CCameraWorker( CGUIFrame *pFrame, CCamera* pCamera );
     virtual ~CCameraWorker( );
 
     // thread entry point
@@ -34,9 +34,11 @@ public:
     double GetTime();
 
 // data
-public:
+protected:
     CGUIFrame*      m_pFrame;
     CCamera*        m_pCamera;
+
+public:
 
     // timers
     //double          m_nCpuFreq;

@@ -52,10 +52,14 @@ const int SURF_COUNT = 10;
 // Input:	nothing
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
-CCamera::CCamera(  ) :
+CCamera::CCamera(  
+#if _GUI_RUN    
+    CGUIFrame* pFrame, CCamView* pCameraView 
+#endif
+    ) :
 #if _GUI_RUN
-    m_pCameraView( NULL ),
-    m_pFrame( NULL ),
+    m_pCameraView( pCameraView ),
+    m_pFrame( pFrame ),
 #endif
     m_pWorker( NULL )
 {
@@ -616,8 +620,11 @@ void CCamera::GetNextFrame( void* )
             m_strFrames << "Frames: " << m_nTotalFrames;
 
 #if _GUI_RUN
-            m_pFrame->SetStatusBarText( m_strFps,0 );
-            m_pFrame->SetStatusBarText( m_strFrames, 1 );
+            if( m_pFrame )
+            {
+                m_pFrame->SetStatusBarText( m_strFps,0 );
+                m_pFrame->SetStatusBarText( m_strFrames, 1 );
+            }
 #endif
         }
     }
@@ -690,6 +697,8 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
         Result = true;
         break;
     case MC_SIG_ACQUISITION_FAILURE:
+        wxMessageBox( _T("No signal. Please check video connection."), 
+            _T("Acquisition Failure") );
         break;
     default:
         break;
@@ -704,7 +713,7 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
             //FormatMulticamErrorText(Status, _T("MC_SurfaceAddr"), strError);
             Result = false;
         }
-        else    
+        else
         //image parameters
             Status = McGetParamInt(m_Channel, MC_ImageSizeX, &ImageWidth); 
 
