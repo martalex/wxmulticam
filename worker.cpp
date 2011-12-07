@@ -51,12 +51,11 @@
 // Input:	pointer to reference frame
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
-CCameraWorker::CCameraWorker( CGUIFrame *pFrame ) : 
-    wxThread( wxTHREAD_DETACHED )
+CCameraWorker::CCameraWorker( CGUIFrame *pFrame, CCamera* pCamera  ) : 
+    wxThread( wxTHREAD_DETACHED ),
+    m_pFrame( pFrame ), // get frame reference
+    m_pCamera( pCamera ) // get camera reference
 {
-    // get frame reference
-    m_pFrame = pFrame;
-
     // start life
     m_bLife = 1;
 
@@ -74,8 +73,8 @@ CCameraWorker::CCameraWorker( CGUIFrame *pFrame ) :
 ////////////////////////////////////////////////////////////////////
 CCameraWorker::~CCameraWorker( )
 {
-    m_pMutex=NULL;
-    m_pCamera=NULL;
+    m_pMutex = NULL;
+    m_pCamera = NULL;
     m_pFrame = NULL;
 }
 
@@ -157,7 +156,8 @@ void *CCameraWorker::Entry( )
 
     }
 
-    m_pCamera->Stop( );
+    if( m_pCamera )
+        m_pCamera->Stop( );
 
     return NULL;
 }
@@ -166,6 +166,6 @@ void CCameraWorker::Stop()
 {
     if( m_pCamera )
         m_pCamera->PauseResume();
-    
+//    m_pCamera = NULL;
     Delete();
 }

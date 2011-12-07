@@ -25,7 +25,11 @@ class CCamera
 // public methods
 public:
     // constructor
-    CCamera( );
+    CCamera( 
+#if _GUI_RUN    
+    CGUIFrame* pFrame, CCamView* pCameraView 
+#endif
+    );
     ~CCamera( );
 
     // get frame method
@@ -58,10 +62,6 @@ public:
     bool            m_bProcBusy;
     int             m_bIsChange;
 
-#if _GUI_RUN
-    CCamView*       m_pCameraView;
-    CGUIFrame*      m_pFrame;
-#endif
 
     CCameraWorker*  m_pWorker;
 
@@ -70,6 +70,11 @@ public:
 
 // protected data
 protected:
+#if _GUI_RUN
+    CCamView*       m_pCameraView;
+    CGUIFrame*      m_pFrame;
+#endif
+
     BYTE*           m_pVideoImg;
     bool            m_isImageReady;
 

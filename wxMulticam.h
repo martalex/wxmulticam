@@ -21,24 +21,13 @@
 #include "resource.h"       // main symbols
 //#include "wx/thread.h"
 
-// external classes
-class CCameraWorker;
-class CCamera;
-
 class wxMultiCamApp : public wxApp
 {
-//     bool m_MulticamDriverOK;
-// 
-//     void OpenMulticam();
-//     void CloseMulticam();
-
 // public methods
 public:
 
 // public data
 public:
-    CCameraWorker*  m_pCameraWorker;
-    CCamera*        m_pCamera;
 
 // protected methods
 protected:

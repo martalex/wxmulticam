@@ -49,9 +49,6 @@ END_EVENT_TABLE()
 ////////////////////////////////////////////////////////////////////
 bool wxMultiCamApp::OnInit( )
 {
-    // create camera object
-    m_pCamera = new CCamera( );
-
     // create widows frame
     CGUIFrame* m_pFrame = new CGUIFrame( NULL, "wxMulticam Demo",
                          wxPoint(-1, -1), wxSize(640, 600) );
@@ -59,41 +56,6 @@ bool wxMultiCamApp::OnInit( )
     // Show the frame
     m_pFrame->Show(TRUE);
     SetTopWindow(m_pFrame);
-
-    // set parent
-    m_pFrame->m_pApp = this;
-
-    // build worker thread to process video stream
-    m_pCameraWorker = new CCameraWorker( m_pFrame );
-    // create thread or fail on exit
-    if ( m_pCameraWorker->Create() != wxTHREAD_NO_ERROR )
-    {
-        wxExit( );
-    }
-
-    // exchange data if gui defined
-    CCamView *pCamView = m_pFrame->GetCameraView();
-
-    // link robot to GUI
-    m_pFrame->m_pWorker = m_pCameraWorker;
-    m_pCameraWorker->m_pCamera = m_pCamera;
-    m_pCamera->m_pWorker = m_pCameraWorker;
-#if _GUI_RUN
-    m_pCamera->m_pCameraView = pCamView;
-    m_pCamera->m_pFrame = m_pFrame;
-#endif
-    // initialize camera 
-    if( m_pCamera->Init(  ) == 0 )
-    {
-        wxMessageBox( "Can't initialize camera.",
-                    "Error" );
-    }
-
-    // start the thread
-    if ( m_pCameraWorker->Run() != wxTHREAD_NO_ERROR )
-    {
-        wxExit( );
-    } 
 
     return TRUE;
 }
@@ -107,13 +69,5 @@ bool wxMultiCamApp::OnInit( )
 ////////////////////////////////////////////////////////////////////
 int wxMultiCamApp::OnExit( )
 {
-    if( m_pCameraWorker != NULL )
-    {
-        m_pCameraWorker->Delete( );
-    }
-    m_pCameraWorker = NULL;
-
-    delete( m_pCamera );
-
     return wxApp::OnExit();
 }
