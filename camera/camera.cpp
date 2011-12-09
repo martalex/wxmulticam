@@ -109,8 +109,10 @@ CCamera::~CCamera( )
 bool CCamera::OpenMulticam()
 {
     // Allocate Multicam driver
-    MCSTATUS Status;
+    MCSTATUS Status = MC_INSTANCE_NOT_FOUND;
+#ifdef WIN32
     Status = McOpenDriver(NULL);
+#endif
     if(Status != MC_OK)
     {
         m_MulticamDriverOK = false;
@@ -119,7 +121,9 @@ bool CCamera::OpenMulticam()
     else
     {
         m_MulticamDriverOK = true;
+#ifdef WIN32
         McSetParamInt(MC_CONFIGURATION, MC_ErrorHandling, MC_ErrorHandling_NONE);
+#endif
     }
 
     return m_MulticamDriverOK;
@@ -130,7 +134,9 @@ void CCamera::CloseMulticam()
     //release Multicam
     if(m_MulticamDriverOK)
     {
+#ifdef WIN32
         McCloseDriver();
+#endif
         m_MulticamDriverOK = false;
     }
 }
@@ -153,7 +159,8 @@ int CCamera::Init(  )
 
     int ColorFormat;
 
-    MCSTATUS Status;
+    MCSTATUS Status = MC_INSTANCE_NOT_FOUND;
+#ifdef WIN32
     //channel
     Status = McCreate(MC_CHANNEL, &m_Channel);
     if(Status != MC_OK)
@@ -305,9 +312,7 @@ int CCamera::Init(  )
 
 
     // Register the callback function
-#ifdef WIN32
     McRegisterCallback(m_Channel, GlobalGrabberCallback, this);
-#endif
 
     //GetSize();
     
@@ -319,6 +324,11 @@ int CCamera::Init(  )
 // 	{
 // 		return false;
 // 	}
+#endif // WIN32
+    if(Status != MC_OK)
+    {
+        return false;
+    }
     return( 1 );
 }
 
@@ -326,8 +336,10 @@ void CCamera::Uninitialize()
 {
     if(m_Channel)
     {
+#ifdef WIN32
         McSetParamInt(m_Channel, MC_ChannelState, MC_ChannelState_IDLE);
         McDelete(m_Channel);
+#endif
         m_Channel = 0;
     }
 
@@ -348,6 +360,8 @@ void CCamera::Uninitialize()
 ////////////////////////////////////////////////////////////////////
 int CCamera::GetSize( )
 {
+    MCSTATUS Status = MC_INSTANCE_NOT_FOUND;
+#ifdef WIN32
     //width
     MCSTATUS Status = McGetParamInt(m_Channel, MC_ImageSizeX, &m_nWidth);
     if(Status != MC_OK)
@@ -374,6 +388,11 @@ int CCamera::GetSize( )
     if( m_pFrame )
         m_pFrame->ResetLayout( );
 #endif
+#endif //WIN32
+    if(Status != MC_OK)
+    {
+        return false;
+    }
 
     return( 1 );
 }
@@ -387,8 +406,10 @@ int CCamera::GetSize( )
 ////////////////////////////////////////////////////////////////////
 void CCamera::Start( )
 {
-    MCSTATUS Status;
+    MCSTATUS Status = MC_INSTANCE_NOT_FOUND;
+#ifdef WIN32
     Status = McSetParamInt(m_Channel, MC_ChannelState, MC_ChannelState_ACTIVE);
+#endif
     if(Status != MC_OK)
     {
 //         FormatMulticamErrorText(Status, _T("McSetParamInt: MC_ChannelState_ACTIVE"), ErrorStr);
@@ -482,8 +503,10 @@ void  CCamera::Stop( )
 {
     m_isRunning = false;
 
-    MCSTATUS Status;
+    MCSTATUS Status = MC_INSTANCE_NOT_FOUND;
+#ifdef WIN32
     Status = McSetParamInt(m_Channel, MC_ChannelState, MC_ChannelState_IDLE);
+#endif
     if(Status != MC_OK)
     {
         //FormatMulticamErrorText(Status, _T("McSetParamInt: MC_ChannelState_IDLE"), ErrorStr);
@@ -703,7 +726,8 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
 
     void* pPixels = NULL;
     int ImageWidth, ImageHeight, ColorFormat;
-    MCSTATUS Status;
+    int ImagePixelSize=0;
+    MCSTATUS Status = MC_INSTANCE_NOT_FOUND;
 
     switch(pSigInfo->Signal)
     {
@@ -721,7 +745,9 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
     if( false != Result )
     {
         //get the source of pixels
+#ifdef WIN32
         Status = McGetParamInt(pSigInfo->SignalInfo, MC_SurfaceAddr, (PINT32)&pPixels);
+#endif
         if(Status != MC_OK)
         {
             //FormatMulticamErrorText(Status, _T("MC_SurfaceAddr"), strError);
@@ -729,7 +755,9 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
         }
         else
         //image parameters
+#ifdef WIN32
             Status = McGetParamInt(m_Channel, MC_ImageSizeX, &ImageWidth); 
+#endif
 
         if(Status != MC_OK)
         {
@@ -738,7 +766,9 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
             Result = false;
         }
         else
+#ifdef WIN32
             Status = McGetParamInt(m_Channel, MC_ImageSizeY, &ImageHeight); 
+#endif
 
         if(Status != MC_OK)
         {
@@ -747,9 +777,10 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
             Result = false;
         }
         else
+#ifdef WIN32
             Status = McGetParamInt(m_Channel, MC_ColorFormat, &ColorFormat);
+#endif
 
-        int ImagePixelSize=0;
         if(Status != MC_OK)
         {
             //Str = _T("McGetParamInt: MC_ColorFormat");
@@ -757,7 +788,9 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
             Result = false;
         }
         else
+#ifdef WIN32
             Status = McGetParamInt(m_Channel, MC_ImagePixelSize, &ImagePixelSize);
+#endif
 
         int iLinePitch = 1;
         if(Status != MC_OK)

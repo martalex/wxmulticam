@@ -26,7 +26,7 @@ find_package(wxWidgets COMPONENTS core base net REQUIRED )
 # wxWidgets include
 include( "${wxWidgets_USE_FILE}" )
 #------------------------------------------------------------------------------
-# set using MFS
+# set define for somthing strange... TODO
 add_definitions ( -D_GUI_RUN )
 #------------------------------------------------------------------------------
 # set install dir
