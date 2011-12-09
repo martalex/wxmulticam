@@ -21,17 +21,19 @@ cmake_minimum_required ( VERSION 2.8 )
 project ( wxcam )
 #------------------------------------------------------------------------------
 # wxWidgets
-find_package(wxWidgets COMPONENTS core base REQUIRED )
+find_package(wxWidgets COMPONENTS core base net REQUIRED )
 #------------------------------------------------------------------------------
 # wxWidgets include
 include( "${wxWidgets_USE_FILE}" )
+#------------------------------------------------------------------------------
+# set using MFS
+add_definitions ( -D_GUI_RUN )
 #------------------------------------------------------------------------------
 # set install dir
 set ( CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR} )
 #------------------------------------------------------------------------------
 # find multicam lib
 find_library ( MULTICAM_LIB NAMES multicam PATHS ${PROJECT_SOURCE_DIR}/MultiCam )
-message ( "STATUS MULTICAM_LIB = ${MULTICAM_LIB}" )
 #------------------------------------------------------------------------------
 # include dirs
 include_directories (
@@ -57,11 +59,13 @@ endif(WIN32)
 add_executable ( wxMulticam WIN32 ${CAM_SOURCES} )
 #------------------------------------------------------------------------------
 # link with libs
+message ( STATUS "wxWidgets_LIBRARIES = ${wxWidgets_LIBRARIES}" )
 target_link_libraries( wxMulticam ${wxWidgets_LIBRARIES} )
 #------------------------------------------------------------------------------
-if( ${MULTICAM_LIB} )
+if( MULTICAM_LIB )
   target_link_libraries( wxMulticam ${MULTICAM_LIB} )
-endif( ${MULTICAM_LIB} )
+  message ( STATUS "used MULTICAM_LIB = ${MULTICAM_LIB}" )
+endif( MULTICAM_LIB )
 #------------------------------------------------------------------------------
 # install program
 install ( TARGETS wxMulticam DESTINATION bin )
