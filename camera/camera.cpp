@@ -617,11 +617,11 @@ void CCamera::GetNextFrame( void* )
                 m_pFrame->SetStatusBarText( m_strFrames, SBID_FRAMES );
 
                 
-                if( m_nTotalFrames % 10 == 1 )
-                {
-//                    m_pFrame->SendFrameNumber( m_nTotalFrames );
-                    m_pFrame->SendFrameData( m_pVideoImg, m_nWidth, m_nHeight, m_nImagePixelSize );
-                }
+//                 if( m_nTotalFrames % 10 == 1 )
+//                 {
+// //                    m_pFrame->SendFrameNumber( m_nTotalFrames );
+//                     m_pFrame->SendFrameData( m_pVideoImg, m_nWidth, m_nHeight, m_nImagePixelSize );
+//                 }
                 //wxSleep( 3000 );
             }
 #endif
@@ -630,6 +630,14 @@ void CCamera::GetNextFrame( void* )
 
     m_bIsProcessing = false;
 
+}
+
+void CCamera::SendFrame( wxSocketBase *sock )
+{
+#if _GUI_RUN
+    if( m_pFrame && m_pVideoImg )
+        m_pFrame->SendFrameData( sock, m_pVideoImg, m_nWidth, m_nHeight, m_nImagePixelSize );
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////

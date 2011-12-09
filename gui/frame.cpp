@@ -24,11 +24,10 @@
 
 // other includes
 #include "about.h"
-#include "../wxMulticam.h"
 #include "camview.h"
 #include "camera/camera.h"
+#include "../wxMulticam.h"
 #include "../worker.h"
-
 #include "../res/camera.xpm"
 
 // main header
@@ -40,16 +39,16 @@
 
 const int SOCKET_CODE_FRAME_NUMBER = 0xBE; 
 const int SOCKET_CODE_FRAME_DATA = 0xCE; 
-
+const int SOCKET_CODE_GET_FRAME_DATA = 0xEF;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGUIFrame
 
 BEGIN_EVENT_TABLE(CGUIFrame, wxFrame)
     // menu items
-    EVT_MENU( wxID_NET_START_SERVER, CGUIFrame::OnServerStart )
-//    EVT_MENU( wxID_NET_WAIT_CONNECT, CGUIFrame::OnServerWaitConnect )
     EVT_MENU( wxID_NET_CONNECT_TO_SERVER, CGUIFrame::OnConnectToServer )
+    EVT_MENU( wxID_NET_GET_FRAME, CGUIFrame::OnNetGetFrame )
+    EVT_MENU( wxID_NET_AUTO_GET_FRAME, CGUIFrame::OnNetAutoGetFrame )
 
     EVT_MENU( wxID_CAM_START, CGUIFrame::OnCameraStart )
     EVT_MENU( wxID_CAM_STOP, CGUIFrame::OnCameraStop )
@@ -81,7 +80,8 @@ CGUIFrame::CGUIFrame( wxFrame *frame, const wxString& title,
     m_sock( NULL ),
     m_numClients(0),
     m_IsServer( false ),
-    m_IsBusy( false )
+    m_IsBusy( false ),
+    m_AutoRepeat( false )
 {
 
     wxIcon icon( camera_xpm );
@@ -100,23 +100,23 @@ CGUIFrame::CGUIFrame( wxFrame *frame, const wxString& title,
     pFileMenu->Append( wxID_EXIT, _T("E&xit") );
 
     // make Camera menu bar
-    wxMenu *pCameraMenu = new wxMenu;
-    pCameraMenu->Append( wxID_CAM_START, _T("S&tart") );
-    pCameraMenu->Append( wxID_CAM_STOP, _T("Sto&p") );
+    m_menuCam = new wxMenu;
+    m_menuCam->Append( wxID_CAM_START, _T("S&tart") );
+    m_menuCam->Append( wxID_CAM_STOP, _T("Sto&p") );
 
 
     // make Net menu bar
     m_menuNet = new wxMenu;
-    m_menuNet->Append( wxID_NET_START_SERVER, _T("S&tart server") );
-    m_menuNet->AppendSeparator( );
     m_menuNet->Append( wxID_NET_CONNECT_TO_SERVER, _T("&Connect to server"), 
         _T("Display the remote image"), wxITEM_CHECK );
-
+    m_menuNet->Append( wxID_NET_GET_FRAME, _T("&Get frame\tF5") );
+    m_menuNet->Append( wxID_NET_AUTO_GET_FRAME, _T("&AutoRepeat"),
+        _T("Get new frame automatically"), wxITEM_CHECK );
 
     // make menu toolbar
     menuBar = new wxMenuBar;
     menuBar->Append( pFileMenu, _T("&File") );
-    menuBar->Append( pCameraMenu, _T("&Camera") );
+    menuBar->Append( m_menuCam, _T("&Camera") );
     menuBar->Append( m_menuNet, _T("&Net") );
     this->SetMenuBar(menuBar);
     
@@ -186,89 +186,6 @@ void CGUIFrame::OnAbout( wxCommandEvent& event )
 
     return;
 }
-
-////////////////////////////////////////////////////////////////////
-// Method:	On Video Source
-// Class:	CGUIFrame
-// Purpose:	when video source menu option selected
-// Input:	reference to event
-// Output:	nothing
-////////////////////////////////////////////////////////////////////
-// void CGUIFrame::OnVideoSource( wxCommandEvent& event )
-// {
-//     CCamView *pView = GetCameraView();
-// 
-// for widnows do this
-// #ifdef _WINDOWS
-// 	// hack to get the windows handler
-// 	typedef struct CvCaptureCAM_VFW
-// 	{
-// 		void* vtable;
-// 		CAPDRIVERCAPS caps;
-// 		HWND   capWnd;
-// 		VIDEOHDR* hdr;
-// 		DWORD  fourcc;
-// 		HIC    hic;
-// 		IplImage* rgb_frame;
-// 		IplImage frame;
-// 	} CvCaptureCAM_VFW;
-// 
-// 
-// 	CvCapture* ptest = pView->m_pCamera->m_pCapture;
-// 	CvCaptureCAM_VFW* p = (CvCaptureCAM_VFW*) ptest;
-// 
-// 	capDlgVideoSource( p->capWnd );
-// #elif _LINUX
-// 	// else ... TODO
-// #endif
-// 
-//     return;
-// }
-
-////////////////////////////////////////////////////////////////////
-// Method:	On Video Format
-// Class:	CGUIFrame
-// Purpose:	when video format menu option selected
-// Input:	reference to event
-// Output:	nothing
-////////////////////////////////////////////////////////////////////
-// void CGUIFrame::OnVideoFormat( wxCommandEvent& event )
-// {
-//     CCamView *pView = GetCameraView();
-// 
-// for widnows do this
-// #ifdef _WINDOWS
-// 	// hack to get the windows handler
-// 	typedef struct CvCaptureCAM_VFW
-// 	{
-// 		void* vtable;
-// 		CAPDRIVERCAPS caps;
-// 		HWND   capWnd;
-// 		VIDEOHDR* hdr;
-// 		DWORD  fourcc;
-// 		HIC    hic;
-// 		IplImage* rgb_frame;
-// 		IplImage frame;
-// 	} CvCaptureCAM_VFW;
-// 
-// 
-// 	CvCapture* ptest = pView->m_pCamera->m_pCapture;
-// 	CvCaptureCAM_VFW* p = (CvCaptureCAM_VFW*) ptest;
-// 
-// 	// first pause camera
-// 	pView->m_pCamera->PauseResume( );
-// 
-// 	capDlgVideoFormat( p->capWnd );
-// 
-// 	// mark change and wait for thread to restart camera
-// 	pView->m_pCamera->IsChanged( );
-// 
-// #elif _LINUX
-// 	// else ... TODO
-// #endif
-// 
-//     return;
-// }
 
 ////////////////////////////////////////////////////////////////////
 // Method:	SetStatusBarText
@@ -373,21 +290,21 @@ void CGUIFrame::OnServerEvent(wxSocketEvent& event)
         switch ( event.GetSocketEvent() )
         {
         case wxSOCKET_INPUT:
-            wxLogMessage("Input available on the socket");
+            wxLogMessage(_T("Input available on the socket"));
             break;
 
         case wxSOCKET_LOST:
-            wxLogMessage("Socket connection was unexpectedly lost.");
+            wxLogMessage(_T("Socket connection was unexpectedly lost."));
             UpdateStatusBar();
             break;
 
         case wxSOCKET_CONNECTION:
-            wxLogMessage("... socket is now connected.");
+            wxLogMessage(_T("... socket is now connected."));
             UpdateStatusBar();
             break;
 
         default:
-            wxLogMessage("Unknown socket event!!!");
+            wxLogMessage(_T("Unknown socket event!!!"));
             break;
         }
     }
@@ -397,7 +314,7 @@ void CGUIFrame::OnSocketEvent(wxSocketEvent& event)
 {
     if( m_IsServer && m_server != NULL )
     {
-        wxString s = _("OnSocketEvent: ");
+        wxString s = _("Server OnSocketEvent: ");
         wxSocketBase *sock = event.GetSocket();
 
         // First, print a message
@@ -425,11 +342,13 @@ void CGUIFrame::OnSocketEvent(wxSocketEvent& event)
 
                 switch (c)
                 {
-                case SOCKET_CODE_FRAME_NUMBER: //0xBE: 
-                    UpdateFrameNumber(sock); 
-                    break;
-                 case SOCKET_CODE_FRAME_DATA: //0xCE: 
-                    UpdateFrameData(sock); 
+//                 case SOCKET_CODE_FRAME_NUMBER: //0xBE: 
+//                     UpdateFrameNumber(sock); 
+//                     break;
+                 case SOCKET_CODE_GET_FRAME_DATA: //0xCE: 
+                    //UpdateFrameData(sock); 
+                    if( m_pCamera )
+                        m_pCamera->SendFrame( sock );
                     break;
 //                 case 0xDE: Test3(sock); break;
                 default:
@@ -461,6 +380,78 @@ void CGUIFrame::OnSocketEvent(wxSocketEvent& event)
         }
 
         UpdateStatusBar();
+    }
+    else if( !m_IsServer && m_sock )
+    {
+        bool bRes = false;
+        wxString s = _("Client OnSocketEvent: ");
+        wxSocketBase *sock = event.GetSocket();
+
+        // First, print a message
+        switch(event.GetSocketEvent())
+        {
+        case wxSOCKET_INPUT : s.Append(_("wxSOCKET_INPUT\n")); break;
+        case wxSOCKET_LOST  : s.Append(_("wxSOCKET_LOST\n")); break;
+        default             : s.Append(_("Unexpected event !\n")); break;
+        }
+
+        //m_text->AppendText(s);
+
+        // Now we process the event
+        switch(event.GetSocketEvent())
+        {
+        case wxSOCKET_INPUT:
+            {
+                // We disable input events, so that the test doesn't trigger
+                // wxSocketEvent again.
+                sock->SetNotify(wxSOCKET_LOST_FLAG);
+
+                // Which test are we going to run?
+                unsigned char c;
+                sock->Read(&c, 1);
+
+                switch (c)
+                {
+                    //                 case SOCKET_CODE_FRAME_NUMBER: //0xBE: 
+                    //                     UpdateFrameNumber(sock); 
+                    //                     break;
+                case SOCKET_CODE_FRAME_DATA: //0xCE: 
+                    bRes = UpdateFrameData(sock); 
+                    break;
+                    //                 case 0xDE: Test3(sock); break;
+                default:
+                    wxLogMessage( _T("Unknown test id received from client") );
+                }
+
+                // Enable input events again.
+                sock->SetNotify(wxSOCKET_LOST_FLAG | wxSOCKET_INPUT_FLAG);
+
+                if( bRes && m_AutoRepeat )
+                    GetNextFrame();
+                //wxMessageBox( _T("Update Next Frame is FALSE") );
+                break;
+            }
+        case wxSOCKET_LOST:
+            {
+                // Destroy() should be used instead of delete wherever possible,
+                // due to the fact that wxSocket uses 'delayed events' (see the
+                // documentation for wxPostEvent) and we don't want an event to
+                // arrive to the event handler (the frame, here) after the socket
+                // has been deleted. Also, we might be doing some other thing with
+                // the socket at the same time; for example, we might be in the
+                // middle of a test or something. Destroy() takes care of all
+                // this for us.
+
+                wxLogMessage( _T("Deleting socket.") );
+                sock->Destroy();
+                m_sock = NULL;
+                break;
+            }
+        default: ;
+        }
+
+        UpdateStatusBar();
+
     }
 }
 
@@ -527,22 +518,37 @@ bool CGUIFrame::CreateServer()
     return true;
 }
 
-void CGUIFrame::OnServerStart( wxCommandEvent& event )
-{
-    if( CreateServer() )
-        WaitForConnection();
-}
+// void CGUIFrame::OnServerStart( wxCommandEvent& event )
+// {
+//     if( CreateServer() )
+//         WaitForConnection();
+// }
 
 void CGUIFrame::OnConnectToServer( wxCommandEvent& event )
 {
     wxASSERT( m_server == NULL );
     CreateClient();
+
     if( m_sock )
         if( m_sock->IsDisconnected() )
+        {
             OpenConnection();
+            GetNextFrame();
+        }
         else
             Disconnect();
+}
 
+void CGUIFrame::OnNetGetFrame( wxCommandEvent& event )
+{
+    GetNextFrame();
+}
+
+void CGUIFrame::OnNetAutoGetFrame( wxCommandEvent& event )
+{
+    m_AutoRepeat = !m_AutoRepeat;
+    if( m_AutoRepeat )
+        GetNextFrame();
 }
 
 void CGUIFrame::Disconnect()
@@ -602,8 +608,6 @@ void CGUIFrame::OnCameraStart( wxCommandEvent& event )
 {
     CameraStop();
 
-//     if( NULL == m_pWorker )
-//         return;
     wxASSERT( m_pCamera == NULL );
     wxASSERT( m_pWorker == NULL );
 
@@ -626,7 +630,10 @@ void CGUIFrame::OnCameraStart( wxCommandEvent& event )
     // initialize camera 
     if( m_pCamera->Init() == 0 )
     {
-        wxMessageBox( "Can't initialize camera.",  "Error" );
+        delete m_pCamera;
+        m_pCamera = NULL;
+
+        wxMessageBox( _T("Can't initialize camera."),  _T("Error") );
         return;
     }
 
@@ -637,6 +644,9 @@ void CGUIFrame::OnCameraStart( wxCommandEvent& event )
         return;
     } 
 
+    // Start the server after successful initialization the grabber (camera)
+    if( CreateServer() )
+        WaitForConnection();
 }
 
 void CGUIFrame::OnCameraStop( wxCommandEvent& event )
@@ -694,7 +704,6 @@ bool CGUIFrame::CreateClient()
     m_IsServer = false;
     UpdateStatusBar();
 
-//    m_busy = false;
     return true;
 }
 
@@ -735,10 +744,14 @@ void CGUIFrame::UpdateStatusBar()
     SetStatusText(s, SBID_NETWORK_STATUS);
 #endif // wxUSE_STATUSBAR
 
-    m_menuNet->Enable( wxID_NET_START_SERVER, m_server == NULL && m_sock == NULL );
-//    m_menuNet->Enable( wxID_NET_WAIT_CONNECT, m_server != NULL );
+    m_menuCam->Enable( wxID_CAM_START, m_pCamera == NULL );
+    m_menuCam->Enable( wxID_CAM_STOP, m_pCamera != NULL );
+
     m_menuNet->Enable( wxID_NET_CONNECT_TO_SERVER, m_server == NULL );
     m_menuNet->Check( wxID_NET_CONNECT_TO_SERVER, m_sock && m_sock->IsConnected() );
+    m_menuNet->Enable( wxID_NET_GET_FRAME, m_sock && m_sock->IsConnected() );
+    m_menuNet->Enable( wxID_NET_AUTO_GET_FRAME, m_sock && m_sock->IsConnected() );
+    m_menuNet->Check( wxID_NET_AUTO_GET_FRAME, m_sock && m_sock->IsConnected() && m_AutoRepeat );
 }
 
 
@@ -768,26 +781,26 @@ void CGUIFrame::SendFrameNumber( int number )
     }
 }
 
-void CGUIFrame::SendFrameData( BYTE* pImg, int w, int h, int pxs )
+void CGUIFrame::SendFrameData( wxSocketBase *sock, BYTE* pImg, int w, int h, int pxs )
 {
     if( !m_IsBusy )
     {
         m_IsBusy = true;
 
-        if( m_sock && m_sock->IsConnected() )
+        if( sock && sock->IsConnected() )
         {
             // Tell the server which test we are running
             unsigned char c = SOCKET_CODE_FRAME_DATA;
-            m_sock->Write(&c, 1);
+            sock->Write(&c, 1);
 
-            m_sock->SetFlags(wxSOCKET_WAITALL);
+            sock->SetFlags(wxSOCKET_WAITALL);
 
             // Write image width
-            m_sock->Write( &w, sizeof(w) );
+            sock->Write( &w, sizeof(w) );
             // Write image height
-            m_sock->Write( &h, sizeof(h) );
+            sock->Write( &h, sizeof(h) );
             // Write image pixel size
-            m_sock->Write( &pxs, sizeof(pxs) );
+            sock->Write( &pxs, sizeof(pxs) );
 
             // Write image frame data
             static BYTE* pFrameData = NULL;
@@ -799,13 +812,13 @@ void CGUIFrame::SendFrameData( BYTE* pImg, int w, int h, int pxs )
                 for( int c=0; c<w; ++c )
                    pFrameData[r*w+c] = pImg[r*w*pxs + c*pxs];
 
-            m_sock->Write( pFrameData, w*h );
+            sock->Write( pFrameData, w*h );
 
             int numberRead=0;
-            m_sock->Read( &numberRead, sizeof( numberRead ) );
+            sock->Read( &numberRead, sizeof( numberRead ) );
             if( numberRead != w*h )
             {
-                m_sock->Close();
+                sock->Close();
                 wxMessageBox( _T(" Frame data: numberRead != w*h ") );
             }
         }
@@ -835,8 +848,11 @@ void CGUIFrame::UpdateFrameNumber( wxSocketBase *sock )
     sock->Write( &totalFrames, sizeof(int) );
 }
 
-void CGUIFrame::UpdateFrameData( wxSocketBase *sock )
+bool CGUIFrame::UpdateFrameData( wxSocketBase *sock )
 {
+    if( !sock || !sock->IsConnected() )
+        return false;
+
     // Receive data from socket and send it back. We will first
     // get a byte with the buffer size, so we can specify the
     // exact size and use the wxSOCKET_WAITALL flag. Also, we
@@ -856,6 +872,9 @@ void CGUIFrame::UpdateFrameData( wxSocketBase *sock )
     if( NULL == pFrameData )
         pFrameData = new BYTE [w*h];
     sock->Read( pFrameData, w*h );
+
+    int numberRead=w*h;
+    sock->Write( &numberRead, sizeof(int) );
 
     static BYTE* pVideoImg = NULL;
     if( NULL == pVideoImg )
@@ -884,6 +903,18 @@ void CGUIFrame::UpdateFrameData( wxSocketBase *sock )
         m_pCamView->DrawCam( pVideoImg, w, h );
 #endif
 
-    int numberRead=w*h;
-    sock->Write( &numberRead, sizeof(int) );
+    return true;
+}
+
+void CGUIFrame::GetNextFrame()
+{
+    // Set a delay 1 sec between auto-retrieve frames
+    wxSleep(1);
+
+    if( m_sock && m_sock->IsConnected() )
+    {
+        // Tell the server which test we are running
+        unsigned char c = SOCKET_CODE_GET_FRAME_DATA;
+        m_sock->Write(&c, 1);
+    }
 }

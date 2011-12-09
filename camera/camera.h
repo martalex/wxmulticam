@@ -18,6 +18,7 @@ class CGUIFrame;
 
 class CCameraWorker;
 
+#include "wx/socket.h"
 #include "MultiCam/multicam.h"
 
 class CCamera 
@@ -51,6 +52,8 @@ public:
 
     wxString GetFpsStr() { return m_strFps; }
     wxString GetFramesStr() { return m_strFrames; }
+
+    void SendFrame( wxSocketBase *sock );
 
 // data
 public:

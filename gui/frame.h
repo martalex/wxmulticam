@@ -41,10 +41,10 @@ enum
 
     // menu items
     // Net
-    wxID_NET_START_SERVER = wxID_HIGHEST+1,
-    wxID_NET_CONNECT_TO_SERVER,
-    wxID_NET_WAIT_CONNECT,
-    
+    wxID_NET_CONNECT_TO_SERVER = wxID_HIGHEST+1,
+    wxID_NET_GET_FRAME,
+    wxID_NET_AUTO_GET_FRAME,
+
     // Camera
     wxID_CAM_START,
     wxID_CAM_STOP
@@ -62,7 +62,7 @@ static wxMenuBar *menuBar = NULL;
 
 class CGUIFrame : public wxFrame
 {
-// public methods	
+// public methods
 public:
     CGUIFrame( wxFrame *frame, const wxString& title, 
             const wxPoint& pos, const wxSize& size );
@@ -73,7 +73,7 @@ public:
     void ResetLayout( );
 
     void SendFrameNumber( int number );
-    void SendFrameData( BYTE* pImg, int w, int h, int pxs );
+    void SendFrameData( wxSocketBase *sock, BYTE* pImg, int w, int h, int pxs );
 
 protected:
     void CameraStop();
@@ -81,6 +81,7 @@ protected:
 
     bool CreateServer();
     bool WaitForConnection();
+    void GetNextFrame();
 
     bool CreateClient();
     void OpenConnection();
@@ -88,7 +89,7 @@ protected:
 
     void UpdateStatusBar();
     void UpdateFrameNumber( wxSocketBase *sock );
-    void UpdateFrameData( wxSocketBase *sock );
+    bool UpdateFrameData( wxSocketBase *sock );
 
 
 // public data
@@ -96,6 +97,7 @@ public:
 
 // Protected data
 protected: 
+    wxMenu         *m_menuCam;
     wxMenu         *m_menuNet;
     
     CCamera*        m_pCamera;
@@ -110,13 +112,13 @@ protected:
     int m_numClients;
     bool m_IsServer;
     bool m_IsBusy;
+    bool m_AutoRepeat;
 
 // message map functions
 protected:
-    void OnServerStart( wxCommandEvent& event );
-//    void OnServerWaitConnect( wxCommandEvent& event );
-    
     void OnConnectToServer( wxCommandEvent& event );
+    void OnNetGetFrame( wxCommandEvent& event );
+    void OnNetAutoGetFrame( wxCommandEvent& event );
 
     void OnCameraStart( wxCommandEvent& event );
     void OnCameraStop( wxCommandEvent& event );
