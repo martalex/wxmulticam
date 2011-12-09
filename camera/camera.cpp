@@ -176,7 +176,7 @@ int CCamera::Init(  )
 // 	USES_CONVERSION;
 // 	char *connector = W2A(m_StartupSettings.m_strConnector);
 // #else
-    char *connector = "VID1";//(char *)LPCTSTR(m_StartupSettings.m_strConnector);
+    const char *connector = "VID1";//(char *)LPCTSTR(m_StartupSettings.m_strConnector);
 // #endif
 
     //connector
@@ -192,7 +192,7 @@ int CCamera::Init(  )
 // 	//USES_CONVERSION;
 // 	char *dcft = W2A(m_StartupSettings.m_strCameraFilename);
 // #else
-    char *dcft = "NTSC.cam";//(char *)LPCTSTR(m_StartupSettings.m_strCameraFilename);
+    const char *dcft = "NTSC.cam";//(char *)LPCTSTR(m_StartupSettings.m_strCameraFilename);
 // #endif
 
     //camera file
@@ -607,12 +607,12 @@ void CCamera::GetNextFrame( void* )
             // get info of number of frames per second in a string
             // for debugging/etc
             m_strFps.Empty();
-            m_strFps << "FPS: " << (int)m_nFps;
+            m_strFps << _T("FPS: ") << (int)m_nFps;
 
             // get info of number of received frames in a string
             // for debugging/etc
             m_strFrames.Empty();
-            m_strFrames << "Frames: " << m_nTotalFrames;
+            m_strFrames << _T("Frames: ") << m_nTotalFrames;
 
 #if _GUI_RUN
             if( m_pFrame )
@@ -652,7 +652,7 @@ void CCamera::SendFrame( wxSocketBase *sock )
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
 //IplImage *CCamera::GetIFrame( )
-BYTE *CCamera::GetIFrame( )
+uint8_t *CCamera::GetIFrame( )
 {
     return( m_pVideoImg );
 }
@@ -803,7 +803,7 @@ void CCamera::OnImageGrabbed(PMCSIGNALINFO pSigInfo)
         //copy
         int ImageSizeBytes = ImageWidth*ImageHeight*ImagePixelSize;
         if( NULL == m_pVideoImg )
-            m_pVideoImg = new BYTE [ImageSizeBytes];
+            m_pVideoImg = new uint8_t [ImageSizeBytes];
         
         if( NULL != m_pVideoImg )
         {

@@ -13,6 +13,7 @@
 
 #include "stdwx.h"
 
+#include "wx/object.h"
 #include "wx/busyinfo.h"
 #include "wx/statline.h"
 #include "wx/minifram.h"
@@ -280,17 +281,17 @@ void CGUIFrame::OnServerEvent(wxSocketEvent& event)
             IPaddress addr;
             if ( !sock->GetPeer(addr) )
             {
-                wxLogMessage("New connection from unknown client accepted.");
+              wxLogMessage(_T("New connection from unknown client accepted."));
             }
             else
             {
-                wxLogMessage("New client connection from %s:%u accepted",
-                    addr.IPAddress(), addr.Service());
+              wxLogMessage(_T("New client connection from %s:%u accepted"),
+                           addr.IPAddress(), addr.Service());
             }
         }
         else
         {
-            wxLogMessage("Error: couldn't accept a new connection");
+          wxLogMessage(_T("Error: couldn't accept a new connection"));
             return;
         }
 

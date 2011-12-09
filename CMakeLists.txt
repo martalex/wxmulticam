@@ -46,12 +46,12 @@ set ( CAM_SOURCES ${CAM_SOURCES}
   gui/frame.cpp
   stdwx.cpp
   worker.cpp
-  wxMulticam.cpp )
+  wxMulticam.cpp
+  camera/camera.cpp )
 #------------------------------------------------------------------------------
 # add resoures to compile
 if(WIN32)
   set ( CAM_SOURCES ${CAM_SOURCES}
-    camera/camera.cpp
     wxMulticam.rc )
 endif(WIN32)
 #------------------------------------------------------------------------------
