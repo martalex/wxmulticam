@@ -15,6 +15,7 @@
 #define CRTDBG_MAP_ALLOC
 #endif
 
+#include <stdint.h>
 #include "wx/socket.h"
 
 // this example is currently written to use only IP or only IPv6 sockets, it
