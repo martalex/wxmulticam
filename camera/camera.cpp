@@ -34,6 +34,7 @@
 #define new DEBUG_NEW
 #endif
 
+#ifdef WIN32
 void WINAPI GlobalGrabberCallback(PMCSIGNALINFO pSigInfo)
 {
     if (pSigInfo && pSigInfo->Context)
@@ -42,6 +43,7 @@ void WINAPI GlobalGrabberCallback(PMCSIGNALINFO pSigInfo)
         pCamera->OnImageGrabbed(pSigInfo);
     }
 }
+#endif
 
 const int SURF_COUNT = 10;
         
@@ -303,7 +305,9 @@ int CCamera::Init(  )
 
 
     // Register the callback function
+#ifdef WIN32
     McRegisterCallback(m_Channel, GlobalGrabberCallback, this);
+#endif
 
     //GetSize();
     

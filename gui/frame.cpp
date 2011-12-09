@@ -78,6 +78,10 @@ CGUIFrame::CGUIFrame( wxFrame *frame, const wxString& title,
 
     m_server( NULL ),
     m_sock( NULL ),
+
+    m_pVideoImg( NULL ),
+    m_pFrameData( NULL ),
+
     m_numClients(0),
     m_IsServer( false ),
     m_IsBusy( false ),
@@ -170,6 +174,14 @@ CGUIFrame::~CGUIFrame( )
     // set to null
     m_pMainPanel = NULL;
     m_pCamView = NULL;
+
+    if( m_pVideoImg )
+        delete [] m_pVideoImg;
+    m_pVideoImg = NULL;
+
+    if( m_pFrameData )
+        delete [] m_pFrameData;
+    m_pFrameData = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -781,7 +793,7 @@ void CGUIFrame::SendFrameNumber( int number )
     }
 }
 
-void CGUIFrame::SendFrameData( wxSocketBase *sock, BYTE* pImg, int w, int h, int pxs )
+void CGUIFrame::SendFrameData( wxSocketBase *sock, uint8_t* pImg, int w, int h, int pxs )
 {
     if( !m_IsBusy )
     {
@@ -803,16 +815,16 @@ void CGUIFrame::SendFrameData( wxSocketBase *sock, BYTE* pImg, int w, int h, int
             sock->Write( &pxs, sizeof(pxs) );
 
             // Write image frame data
-            static BYTE* pFrameData = NULL;
-            if( NULL == pFrameData )
+            //static uint8_t* m_pFrameData = NULL;
+            if( NULL == m_pFrameData )
             {
-                pFrameData = new BYTE [w*h];
+                m_pFrameData = new uint8_t [w*h];
             }
             for( int r=0; r<h; ++r )
                 for( int c=0; c<w; ++c )
-                   pFrameData[r*w+c] = pImg[r*w*pxs + c*pxs];
+                   m_pFrameData[r*w+c] = pImg[r*w*pxs + c*pxs];
 
-            sock->Write( pFrameData, w*h );
+            sock->Write( m_pFrameData, w*h );
 
             int numberRead=0;
             sock->Read( &numberRead, sizeof( numberRead ) );
@@ -868,22 +880,21 @@ bool CGUIFrame::UpdateFrameData( wxSocketBase *sock )
     sock->Read( &pxs, sizeof(int) );
 
     // Read the frame image data
-    static BYTE* pFrameData = NULL;
-    if( NULL == pFrameData )
-        pFrameData = new BYTE [w*h];
-    sock->Read( pFrameData, w*h );
+    //static uint8_t* m_pFrameData = NULL;
+    if( NULL == m_pFrameData )
+        m_pFrameData = new uint8_t [w*h];
+    sock->Read( m_pFrameData, w*h );
 
     int numberRead=w*h;
     sock->Write( &numberRead, sizeof(int) );
 
-    static BYTE* pVideoImg = NULL;
-    if( NULL == pVideoImg )
-        pVideoImg = new BYTE [w*h*pxs];
+    if( NULL == m_pVideoImg )
+        m_pVideoImg = new uint8_t [w*h*pxs];
 
     for( int r=0; r<h; ++r )
         for( int c=0; c<w; ++c )
             for( int x=0; x<pxs; ++x )
-                pVideoImg[r*w*pxs + c*pxs + x] = pFrameData[r*w+c];
+                m_pVideoImg[r*w*pxs + c*pxs + x] = m_pFrameData[r*w+c];
 
     wxString text;
     text << _T("Frame: ") << w << _T(" x ") << h << _T(" x ") << pxs;
@@ -900,7 +911,7 @@ bool CGUIFrame::UpdateFrameData( wxSocketBase *sock )
 #ifdef _GUI_RUN
     // Update gui
     if( m_pCamView )
-        m_pCamView->DrawCam( pVideoImg, w, h );
+        m_pCamView->DrawCam( m_pVideoImg, w, h );
 #endif
 
     return true;

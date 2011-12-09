@@ -147,7 +147,7 @@ void CCamView::Draw( wxDC& dc )
 // Input:	nothing
 // Output:	nothing
 ////////////////////////////////////////////////////////////////////
-void CCamView::DrawCam( BYTE* pImg, int w, int h )
+void CCamView::DrawCam( uint8_t* pImg, int w, int h )
 {
     if( m_bDrawing ) return;
 

@@ -14,8 +14,8 @@
 
 #include "stdwx.h"
 
-// #include <wx/bitmap.h>
-// #include <wx/gdicmn.h>
+#include <wx/bitmap.h>
+#include <wx/gdicmn.h>
 #include "wx/statline.h"
 
 #if defined(__WXMSW__)
@@ -63,17 +63,17 @@ CAbout::CAbout(wxWindow *parent)
         return;
 
     // load logo image from resource by string identifier
-    wxBitmap bmp(wxBITMAP(IDC_ABOUT));
+//     wxBitmap bmp(wxBITMAP(IDC_ABOUT));
 
-    if( bmp.Ok() )
-    {
-#if !defined(__WXGTK__) && !defined(__WXMOTIF__) && !defined(__WXMAC__)
-        bmp.SetMask(new wxMask(bmp, *wxBLUE));
-#endif
-        wxStaticBitmap *sbmp = new wxStaticBitmap(this, -1, bmp);
+//     if( bmp.Ok() )
+//     {
+// #if !defined(__WXGTK__) && !defined(__WXMOTIF__) && !defined(__WXMAC__)
+//         bmp.SetMask(new wxMask(bmp, *wxBLUE));
+// #endif
+//         wxStaticBitmap *sbmp = new wxStaticBitmap(this, -1, bmp);
 
-        sizer->Add( sbmp, 0, wxCENTRE | wxALL, 10 );
-    }
+//         sizer->Add( sbmp, 0, wxCENTRE | wxALL, 10 );
+//     }
 
     sizer->Add( new wxStaticLine(this, -1), 0, wxGROW | wxLEFT | wxRIGHT, 5 );
     sizer->Add( CreateTextSizer(

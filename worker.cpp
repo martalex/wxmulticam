@@ -126,7 +126,9 @@ void *CCameraWorker::Entry( )
     int i = 0;
     m_bLife = 1;
 
+#ifdef WIN32
     m_pCamera->Start( );
+#endif
 
     ////////////////////////////////////////////////////////////////
     // Start Life Cycle
@@ -143,7 +145,9 @@ void *CCameraWorker::Entry( )
         // is running
         if( m_pCamera->m_isRunning )
         {
+#ifdef WIN32
             m_pCamera->Run( );
+#endif
 
         }
         // the here you can insert your extra bit of processing
@@ -156,8 +160,10 @@ void *CCameraWorker::Entry( )
 
     }
 
+#ifdef WIN32
     if( m_pCamera )
         m_pCamera->Stop( );
+#endif
 
     return NULL;
 }
@@ -165,7 +171,9 @@ void *CCameraWorker::Entry( )
 void CCameraWorker::Stop()
 {
     if( m_pCamera )
+#ifdef WIN32
         m_pCamera->PauseResume();
-//    m_pCamera = NULL;
+#endif
+    
     Delete();
 }

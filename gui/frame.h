@@ -73,7 +73,7 @@ public:
     void ResetLayout( );
 
     void SendFrameNumber( int number );
-    void SendFrameData( wxSocketBase *sock, BYTE* pImg, int w, int h, int pxs );
+    void SendFrameData( wxSocketBase *sock, uint8_t* pImg, int w, int h, int pxs );
 
 protected:
     void CameraStop();
@@ -113,6 +113,9 @@ protected:
     bool m_IsServer;
     bool m_IsBusy;
     bool m_AutoRepeat;
+
+    uint8_t* m_pVideoImg;
+    uint8_t* m_pFrameData;
 
 // message map functions
 protected:

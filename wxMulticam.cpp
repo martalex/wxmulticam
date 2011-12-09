@@ -50,7 +50,7 @@ END_EVENT_TABLE()
 bool wxMultiCamApp::OnInit( )
 {
     // create widows frame
-    CGUIFrame* m_pFrame = new CGUIFrame( NULL, "wxMulticam Demo",
+    CGUIFrame* m_pFrame = new CGUIFrame( NULL, L"wxMulticam Demo",
                          wxPoint(-1, -1), wxSize(640, 600) );
 
     // Show the frame
@@ -69,5 +69,6 @@ bool wxMultiCamApp::OnInit( )
 ////////////////////////////////////////////////////////////////////
 int wxMultiCamApp::OnExit( )
 {
+
     return wxApp::OnExit();
 }
